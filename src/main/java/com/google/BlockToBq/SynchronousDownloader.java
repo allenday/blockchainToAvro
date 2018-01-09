@@ -51,10 +51,10 @@ public class SynchronousDownloader {
 //        new BlockChain(NETWORK_PARAMETERS, new MemoryBlockStore(NETWORK_PARAMETERS)),
 //        new PeerAddress(NETWORK_PARAMETERS, InetAddress.getLocalHost()));
 
-    //BlockStore blockStore = new PostgresFullPrunedBlockStore(NETWORK_PARAMETERS, 1000, "35.225.83.56", "bitcoinj", "postgres", "root1234");
-    LevelDBFullPrunedBlockStore blockStore = new LevelDBFullPrunedBlockStore(NETWORK_PARAMETERS, ".data/", Integer.MAX_VALUE);
-    //BlockChain blockChain = new BlockChain(NETWORK_PARAMETERS, blockStore);
-    FullPrunedBlockChain blockChain = new FullPrunedBlockChain(NETWORK_PARAMETERS, blockStore);
+    BlockStore blockStore = new PostgresFullPrunedBlockStore(NETWORK_PARAMETERS, 1000, "35.225.83.56", "bitcoinj", "postgres", "root1234");
+    //LevelDBFullPrunedBlockStore blockStore = new LevelDBFullPrunedBlockStore(NETWORK_PARAMETERS, ".data/", Integer.MAX_VALUE);
+    BlockChain blockChain = new BlockChain(NETWORK_PARAMETERS, blockStore);
+    //FullPrunedBlockChain blockChain = new FullPrunedBlockChain(NETWORK_PARAMETERS, blockStore);
 
     // configure what peers we connect to
     PeerGroup peerGroup = new PeerGroup(NETWORK_PARAMETERS, blockChain);
@@ -117,6 +117,7 @@ public class SynchronousDownloader {
       */
       //System.err.println(b);
     }
+
     writer.close();
   }
 }
