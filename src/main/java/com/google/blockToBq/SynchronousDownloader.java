@@ -1,6 +1,7 @@
-package com.google.BlockToBq;
+package com.google.blockToBq;
 
-import com.google.BlockToBq.Ingestion;
+import com.google.blockToBq.AvroWriter;
+import com.google.blockToBq.BlockHandler;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.bitcoinj.core.*;
@@ -32,8 +33,8 @@ public class SynchronousDownloader {
   public static final String AGENT_VERSION = "1.0";
   public static final int MAX_CONNECTIONS = 1000;
   public static final int CONNECTION_TIMEOUT_MILLIS = 5000;
-  private static Ingestion.AvroFileWriter writer;
-  private static Ingestion ingester;
+  private static AvroWriter writer;
+  private static BlockHandler blockHandler;
 
   final static NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
   final static VersionMessage ver = new VersionMessage(NETWORK_PARAMETERS, 42);
@@ -43,8 +44,8 @@ public class SynchronousDownloader {
 
     File file = new File(args[0]);//args[0]);
     String recentHash = args[1];
-    writer = new Ingestion.AvroFileWriter(file);
-    ingester = new Ingestion(writer);
+    writer = new  AvroWriter(file);
+    blockHandler = new BlockHandler(writer);
 
 //    ver.localServices = VersionMessage.NODE_NETWORK;
 //    final Peer bitcoind = new Peer(NETWORK_PARAMETERS, ver,
@@ -84,7 +85,7 @@ public class SynchronousDownloader {
     int retrieved = 0;
     while (block.getHash() != Sha256Hash.ZERO_HASH) {
       System.err.println("ingestion count: "+retrieved);
-      ingester.onBlock(block);
+      blockHandler.onBlock(block);
       retrieved++;
       block = peer.getBlock(block.getPrevBlockHash()).get();
       /*
