@@ -84,7 +84,7 @@ public class SynchronousDownloader {
     int height = blockChain.getBestChainHeight();
     int retrieved = 0;
     while (block.getHash() != Sha256Hash.ZERO_HASH) {
-
+      System.err.println("ingestion count: "+retrieved);
       ingester.onBlock(block);
       /*
       Long difficulty = block.getDifficultyTarget();
