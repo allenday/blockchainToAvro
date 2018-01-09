@@ -117,5 +117,6 @@ public class SynchronousDownloader {
       */
       //System.err.println(b);
     }
+    writer.close();
   }
 }
