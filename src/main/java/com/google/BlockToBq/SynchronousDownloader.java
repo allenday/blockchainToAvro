@@ -1,6 +1,6 @@
-package com.google.blockToBq;
+package com.google.BlockToBq;
 
-import com.google.blockToBq.generated.AvroBitcoinBlock;
+import com.google.BlockToBq.Ingestion;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.bitcoinj.core.*;
@@ -32,6 +32,8 @@ public class SynchronousDownloader {
   public static final String AGENT_VERSION = "1.0";
   public static final int MAX_CONNECTIONS = 1000;
   public static final int CONNECTION_TIMEOUT_MILLIS = 5000;
+  private static Ingestion.AvroFileWriter writer;
+  private static Ingestion ingester;
 
   final static NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
   final static VersionMessage ver = new VersionMessage(NETWORK_PARAMETERS, 42);
@@ -41,9 +43,9 @@ public class SynchronousDownloader {
 
   public static void main(String[] args) throws BlockStoreException, ExecutionException, InterruptedException, IOException {
 
-    File file = new File("/tmp/out.avro");//args[0]);
-    AvroWriter writer = new AvroWriter(file);
-    BlockHandler blockHandler = new BlockHandler(writer);
+    File file = new File(args[0]);//args[0]);
+    writer = new Ingestion.AvroFileWriter(file);
+    ingester = new Ingestion(writer);
 
 //    ver.localServices = VersionMessage.NODE_NETWORK;
 //    final Peer bitcoind = new Peer(NETWORK_PARAMETERS, ver,
@@ -77,22 +79,13 @@ public class SynchronousDownloader {
     //TODO
     Sha256Hash recentBlock = Sha256Hash.wrap(recentHash);
 
-    peer.addBlocksDownloadedEventListener(Threading.SAME_THREAD, new BlocksDownloadedEventListener() {
-      @Override
-      public void onBlocksDownloaded(Peer peer, Block block, @Nullable FilteredBlock filteredBlock, int i) {
-        //System.err.println(block);
-        //Sha256Hash prevBlock = block.getPrevBlockHash();
-        //peer.getBlock(prevBlock);
-      }
-    });
-
     //Block b = peer.getBlock(blockStore.getChainHead().getHeader().getHash()).get();
     Block block = peer.getBlock(recentBlock).get();
     int height = blockChain.getBestChainHeight();
     int retrieved = 0;
     while (block.getHash() != Sha256Hash.ZERO_HASH) {
 
-      blockHandler.onBlock(block);
+      ingester.onBlock(block);
       /*
       Long difficulty = block.getDifficultyTarget();
       Long blockVersion = block.getVersion();
