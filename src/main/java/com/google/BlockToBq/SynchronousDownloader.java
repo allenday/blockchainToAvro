@@ -39,11 +39,10 @@ public class SynchronousDownloader {
   final static VersionMessage ver = new VersionMessage(NETWORK_PARAMETERS, 42);
   private static Sha256Hash bitcoindChainHead = NETWORK_PARAMETERS.getGenesisBlock().getHash();
 
-  final static String recentHash = "000000000000000000734abec19060f1dfb71cc3543338f9466424adc1ef5936";
-
   public static void main(String[] args) throws BlockStoreException, ExecutionException, InterruptedException, IOException {
 
     File file = new File(args[0]);//args[0]);
+    String recentHash = args[1];
     writer = new Ingestion.AvroFileWriter(file);
     ingester = new Ingestion(writer);
 
@@ -70,7 +69,7 @@ public class SynchronousDownloader {
 
     while (null == peerGroup.getDownloadPeer()) {
       System.err.println("connecting to peers");
-      Thread.sleep(1000*5);
+      Thread.sleep(1000 * 5);
     }
 
     Peer peer = peerGroup.getDownloadPeer();
@@ -86,6 +85,8 @@ public class SynchronousDownloader {
     while (block.getHash() != Sha256Hash.ZERO_HASH) {
       System.err.println("ingestion count: "+retrieved);
       ingester.onBlock(block);
+      retrieved++;
+      block = peer.getBlock(block.getPrevBlockHash()).get();
       /*
       Long difficulty = block.getDifficultyTarget();
       Long blockVersion = block.getVersion();
@@ -114,8 +115,6 @@ public class SynchronousDownloader {
         }
       }
       */
-      retrieved++;
-      block = peer.getBlock(block.getPrevBlockHash()).get();
       //System.err.println(b);
     }
   }
